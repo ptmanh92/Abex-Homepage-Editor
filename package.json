@@ -1,0 +1,24 @@
+{
+  "name": "Abex-Homepage-Editor",
+  "version": "1.0.0",
+  "description": "Verwaltungstool fuer Abex homepage",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ptmanh92/Abex-Homepage-Editor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ptmanh92/Abex-Homepage-Editor/issues"
+  },
+  "homepage": "https://github.com/ptmanh92/Abex-Homepage-Editor#readme",
+  "dependencies": {
+    "electron": "^13.1.9"
+  }
+}
