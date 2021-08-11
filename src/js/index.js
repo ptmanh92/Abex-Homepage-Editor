@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '../css/styles.scss';
+import Mainscreen from '../components/Mainscreen';
 
-ReactDOM.render(<h1>Hello</h1>, document.getElementById('root'))
+ReactDOM.render(<Mainscreen />, document.getElementById('root'))

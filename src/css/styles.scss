@@ -1,0 +1,80 @@
+// Color schemas
+// Gray
+// $color_schema_gray_800: #424242;
+// $color_schema_gray_700: #616161;
+// $color_schema_gray_600: #757575;
+// $color_schema_gray_500: #9E9E9E;
+// $color_schema_gray_400: #BDBDBD;
+// $color_schema_gray_300: #E0E0E0;
+// $color_schema_gray_200: #EEEEEE;
+// $color_schema_gray_100: #FAFAFA;
+// Blue-gray
+$color_schema_blue_800: #263238;
+$color_schema_blue_700: #37474F;
+$color_schema_blue_600: #526069;
+$color_schema_blue_500: #76838F;
+$color_schema_blue_400: #A3AFB7;
+$color_schema_blue_300: #CCD5DB;
+$color_schema_blue_200: #E4EAEC;
+$color_schema_blue_100: #F3F7F9;
+
+$color_box_shadow: rgb(0, 0, 0, .2);
+
+// GLOBAL
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+body * {
+    font-family: 'Lato', sans-serif;
+}
+body {
+    // background: url('../../assets/img/bkgr/white_carbon.png') repeat;
+    background-color: $color_schema_blue_100;
+    margin: 0;
+    padding: 0;
+}
+#root {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+}
+
+// RIGHT NAVIGATION
+.right_nav_wrapper {
+    height: 100vh;
+    box-shadow: 0.2rem 0 0.4rem $color_box_shadow;
+    background-color: white;
+    padding: 0;
+
+    .accordion-button {
+        gap: 0.5rem;
+
+        i {
+            font-size: 1.2rem;
+        }
+        &:focus {
+            box-shadow: none;
+        }
+        &:not(.collapsed), &:hover {
+            color: white;
+            background-color: $color_schema_blue_700;
+        }
+    }
+
+    .accordion-body {
+        padding: 0;
+
+        .list-group-item {
+            background-color: $color_schema_blue_600;
+            color: white;
+
+            &:hover {
+                background-color: $color_schema_blue_500;
+                border-color: transparent;
+            }
+        }
+    }
+
+    .no_arrow button::after {
+        background-image: none;
+    }
+}
+

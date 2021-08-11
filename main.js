@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu } = require('electron');
+const path = require('path');
 
 // this should be placed at top of main.js to handle setup events quickly
 if (handleSquirrelEvent(app)) {
@@ -11,11 +12,11 @@ const isDev = process.env.NODE_ENV == 'production' ? false : true;
 const isMac = process.platform == 'darwin' ? true : false;
 
 let mainWindow;
-let aboutWindow;
+// let aboutWindow;
 
 function createMainWindow() {
     mainWindow = new BrowserWindow({
-        width: isDev? 1920 : 1366,
+        width: isDev? 2086 : 1366,
         height: 768,
         icon: `${__dirname}/assets/img/icons/256x256.png`,
         resizable: isDev ? true : false,
@@ -53,6 +54,11 @@ function createMainWindow() {
 //     aboutWindow.loadFile('./app/about.html');
 //     aboutWindow.removeMenu();
 // }
+
+// Auto reload electron
+require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, 'node_modules', '.bin', 'electron')
+})
 
 app.on('ready', () => {
     createMainWindow()
