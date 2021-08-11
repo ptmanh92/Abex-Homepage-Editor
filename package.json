@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --config webpack.common.js --watch",
     "start": "electron ."
   },
   "repository": {
@@ -19,6 +20,23 @@
   },
   "homepage": "https://github.com/ptmanh92/Abex-Homepage-Editor#readme",
   "dependencies": {
-    "electron": "^13.1.9"
+    "bootstrap": "^5.1.0",
+    "electron": "^13.1.9",
+    "react": "^17.0.2",
+    "react-bootstrap": "^1.6.1",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-react": "^7.14.5",
+    "babel-loader": "^8.2.2",
+    "css-loader": "^6.2.0",
+    "electron-reload": "^2.0.0-alpha.1",
+    "sass": "^1.37.5",
+    "sass-loader": "^12.1.0",
+    "style-loader": "^3.2.1",
+    "webpack": "^5.50.0",
+    "webpack-cli": "^4.7.2"
   }
 }

@@ -31,7 +31,7 @@ function createMainWindow() {
     } 
 
     // mainWindow.loadURL(`file://${__dirname}/app/index.html`);
-    mainWindow.loadFile('./app/index.html');
+    mainWindow.loadFile('./screens/index.html');
 }
 
 // function createAboutWindow() {
