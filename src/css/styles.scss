@@ -87,9 +87,6 @@ body {
 .main_content {
     padding: 0;
 }
-// #main_header, #main_footer {
-//     background-color: $color_schema_blue_200;
-// }
 #main_body {
     overflow-y: auto;
 
@@ -111,5 +108,28 @@ body {
                 text-align: left;
             }
         }
+    }
+}
+
+// PRODUCT MODAL
+#product_details_modal {
+    .modal-header, .modal-footer {
+        background-color: $color_schema_blue_100;
+        // box-shadow: 0.2rem 0 0.4rem $color_box_shadow;
+    }
+    .modal-body {
+        background-color: $color_schema_blue_200;
+        img {
+            width: 100%;
+            height: auto;
+        }
+        .product_gallery_wrapper {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+    }
+    .form-label {
+        font-weight: bold;
     }
 }

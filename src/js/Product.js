@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import ListGroup from 'react-bootstrap/ListGroup';
 import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Image from 'react-bootstrap/Image'
+import { CKEditor } from 'ckeditor4-react';
 import { shell } from 'electron';
 
 //Request options
@@ -19,6 +20,7 @@ var requestOptions_woo = {
     headers: woo_headers,
     redirect: 'follow'
 };
+const no_photo = '../assets/img/default/no_photo.jpg';
 
 const get_all_products = async (event, page_number) => {
     console.log("Get all products...");
@@ -44,8 +46,12 @@ const display_all_products = (data) => {
 }
 
 const ProductListBody = (props) => {
-    const [show_product_modal, setShowProductModal] = useState(false);
     const [product_data, setProductData] = useState({});
+    const [show_product_modal, setShowProductModal] = useState(false);
+    const display_product_modal = (new_data) => {
+        setProductData(new_data);
+        setShowProductModal(true);
+    }
 
     const select_all_checkboxes = (e) => {
         let checked_state = e.target.checked;
@@ -76,18 +82,29 @@ const ProductListBody = (props) => {
     const ProductModal = () => {
         const [textfield_name, setTextfieldName] = useState(product_data.name);
         const [textfield_sku, setTextfieldSKU] = useState(product_data.sku);
-
+        const [textfield_active_price, setTextfieldActivePrice] = useState(product_data.price);
+        const [select_type, setSelectType] = useState(product_data.type);
         const [checkbox_visble, setCheckboxVisble] = useState(product_data.status == 'publish' ? true : false)
+        const [images, setImages] = useState(product_data.images || [{src: no_photo}]);
+        // const [single_image, setSingleImage] = useState(no_photo);
+
+        
+
+        useEffect(() => {
+            // setImages(product_data.images)
+            // setSingleImage(product_data.images[0].src)
+            
+        }, [])
         
         return (
-            <Modal show={show_product_modal} fullscreen={true} onHide={() => setShowProductModal(false)}>
+            <Modal show={show_product_modal} fullscreen={true} onHide={() => setShowProductModal(false)} id="product_details_modal">
                 <Modal.Header closeButton>
                     <Modal.Title>{product_data.name}</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
                     <Row>
-                        <Col xs={8} className="product_info">
+                        <Col xs={9} className="product_info_basic">
                             <Form>
                                 <Form.Group className="mb-3" controlId="product_title">
                                     <Form.Label>Titel</Form.Label>
@@ -99,19 +116,66 @@ const ProductListBody = (props) => {
                                     <Form.Control type="text" value={textfield_sku} onChange={(e) => { setTextfieldSKU(e.target.value) }} />
                                 </Form.Group>
 
+                                <Form.Group className="mb-3" controlId="product_active_price">
+                                    <Form.Label>Preis</Form.Label>
+                                    <Form.Control type="number" min="0" step="0.01" value={textfield_active_price} onChange={(e) => { setTextfieldActivePrice(e.target.value) }} />
+                                </Form.Group>
+
                                 <Form.Group className="mb-3" controlId="product_status">
                                     <Form.Check type="checkbox" label="Sichtbar?" checked={checkbox_visble} onChange={(e) => { setCheckboxVisble(e.target.checked) }} />
                                 </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="product_type">
+                                    <Form.Select value={select_type} onChange={(e) => { setSelectType(e.target.selectedOptions[0].value) }}>
+                                        <option value="simple">Einfaches Produkt</option>
+                                        <option value="variable">Variables Produkt</option>
+                                    </Form.Select>
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="product_short_desc">
+                                    <Form.Label>Kurzbeschreibung</Form.Label>
+                                    <CKEditor
+                                        initData={product_data.short_description}
+                                        config={{
+                                            allowedContent: true,
+                                            height: '15rem'
+                                        }}
+                                        name="short_description_editor"
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="product_desc">
+                                    <Form.Label>Beschreibung</Form.Label>
+                                    <CKEditor
+                                        initData={product_data.description}
+                                        config={{
+                                            allowedContent: true,
+                                            height: '30rem'
+                                        }}
+                                        name="description_editor"
+                                    />
+                                </Form.Group>
                             </Form>
                         </Col>
-                        <Col xs={4} className="product_gallery">
-
+                        <Col xs={3} className="product_info_more">
+                            <Row>
+                                <img src={images[0].src} className="image_viewer" />
+                            </Row>
+                            <Row>
+                                <div className="product_gallery_wrapper">
+                                    {/* { images.map((image) => {
+                                        return (
+                                            <img src={image.src} />
+                                        )
+                                    }) } */}
+                                </div>
+                            </Row>
                         </Col>
                     </Row>
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => { setShowProductModal(false) }}>Schließen</Button>
+                    {/* <Button variant="secondary" onClick={() => { setShowProductModal(false) }}>Schließen</Button> */}
                     <Button variant="primary" onClick={() => { setShowProductModal(false) }}>Aktualisieren</Button>
                 </Modal.Footer>
             </Modal>
@@ -138,25 +202,26 @@ const ProductListBody = (props) => {
                         let type = product.type == 'variable' ? 'check' : 'times';
                         let visible = product.status == 'publish' ? 'check' : 'times';
                         return (
-                        <tr key={product.id} id={`product_${product.id}`} className="product_row">
-                            <td><Form.Check inline type="checkbox" name="product_item_checkbox" id={`checkbox_${product.id}`} onChange={(e) => {set_checkbox_state(e)}} /></td>
-                            <td><img src={img_url}></img></td>
-                            <td className="row_product_name">{product.name}</td>
-                            <td>{product.sku}</td>
-                            <td><i className={`fa fa-${type}`}></i></td>
-                            <td><i className={`fa fa-${visible}`}></i></td>
-                            <td>
-                                <ButtonGroup>
-                                    <Button variant="secondary" size="sm" className="shadow-none" onClick={(e) => { shell.openExternal(product.permalink) }}><i className="fa fa-eye"></i></Button>
-                                    <Button variant="secondary" size="sm" className="shadow-none" onClick={(e) => { setProductData(product); setShowProductModal(true) }}><i className="fa fa-pencil"></i></Button>
-                                    <Button variant="secondary" size="sm" className="shadow-none"><i className="fa fa-trash"></i></Button>
-                                </ButtonGroup>
-                            </td>
-                        </tr>
-                    )}) }
+                            <tr key={product.id} id={`product_${product.id}`} className="product_row">
+                                <td><Form.Check inline type="checkbox" name="product_item_checkbox" id={`checkbox_${product.id}`} onChange={(e) => {set_checkbox_state(e)}} /></td>
+                                <td><img src={img_url}></img></td>
+                                <td className="row_product_name">{product.name}</td>
+                                <td>{product.sku}</td>
+                                <td><i className={`fa fa-${type}`}></i></td>
+                                <td><i className={`fa fa-${visible}`}></i></td>
+                                <td>
+                                    <ButtonGroup>
+                                        <Button variant="secondary" size="sm" className="shadow-none" onClick={(e) => { shell.openExternal(product.permalink) }}><i className="fa fa-eye"></i></Button>
+                                        <Button variant="secondary" size="sm" className="shadow-none" onClick={(e) => { display_product_modal(product) }}><i className="fa fa-pencil"></i></Button>
+                                        <Button variant="secondary" size="sm" className="shadow-none"><i className="fa fa-trash"></i></Button>
+                                    </ButtonGroup>
+                                </td>
+                            </tr>
+                        )
+                    }) }
                 </tbody>
             </Table>
-            <ProductModal/>
+            <ProductModal />
         </div>
     )
 }
