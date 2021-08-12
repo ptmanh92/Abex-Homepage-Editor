@@ -78,3 +78,38 @@ body {
     }
 }
 
+// MAIN
+#main {
+    display: grid;
+    grid-template-rows: 3.2rem auto 3.2rem;
+    height: 100vh;
+}
+.main_content {
+    padding: 0;
+}
+// #main_header, #main_footer {
+//     background-color: $color_schema_blue_200;
+// }
+#main_body {
+    overflow-y: auto;
+
+    table.product_list {
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+            .form-check-inline {
+                margin: 0;
+            }
+        }
+        .product_row {
+            img {
+                max-width: 4rem;;
+                height: auto;
+            }
+
+            td.row_product_name {
+                text-align: left;
+            }
+        }
+    }
+}

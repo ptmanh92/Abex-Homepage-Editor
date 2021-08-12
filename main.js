@@ -23,7 +23,7 @@ function createMainWindow() {
         webPreferences: {
             nodeIntegration: true,
             worldSafeExecuteJavaScript: true,
-            contextIsolation: true
+            contextIsolation: false
         }
     })
 
