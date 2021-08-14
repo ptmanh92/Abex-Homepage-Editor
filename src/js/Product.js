@@ -24,10 +24,6 @@ var requestOptions_woo = {
 };
 const no_photo = '../assets/img/default/no_photo.jpg';
 
-const get_all_categories = async () => {
-    
-}
-
 const get_all_products = async (event, page_number) => {
     console.log("Get all products...");
     
@@ -47,12 +43,81 @@ const get_all_products = async (event, page_number) => {
 
 const display_all_products = (data) => {
     console.log("Display all products...");
-    console.log(data);
     ReactDOM.render(<ProductListBody>{data}</ProductListBody>, document.getElementById("main_body"))
 }
 
 const update_product = () => {
     console.log("Updating...");
+}
+
+const get_all_categories = async () => {
+    display_all_categories();
+
+    let url = "https://abex.phanthemanh.com/wp-json/wc/v3/products/categories?parent=0&per_page=100";
+
+           await fetch(url, requestOptions_woo)
+        .then(response => {
+            let total_pages = parseInt(response.headers.get('X-WP-TotalPages'));
+            let total_pages_array = [];
+            for (let i = 1; i <= total_pages; i++) {
+                total_pages_array.push(i);
+            }
+            get_categories_per_page(url, total_pages_array);
+        })
+        .then(result => {})
+        .catch(error => {
+            console.log('error', error);
+        });
+}
+
+const get_categories_per_page = async (url, pages_array) => {
+    const add_option_to_select = (id, value, title, class_name) => {
+        console.log(`Adding ${title}`);
+        let select_list = document.getElementById(id);
+        let option_item = document.createElement("option");
+        option_item.value = value;
+        option_item.innerText = title;
+        option_item.setAttribute("class", class_name);
+        select_list.appendChild(option_item);
+    }
+    
+    for (const page_number of pages_array) {
+        // if (debug_mode) console.log(`Fetching page ${page_number}...`);
+
+        await fetch(url + "&page=" + page_number, requestOptions_woo)
+        .then(response => response.json())
+        .then(result => {
+            for (const item of result) {
+                add_option_to_select("categories_list", item.id, item.name, 'category_item');
+            }
+        })
+        .catch(error => console.log('error', error));
+    }
+}
+
+const display_all_categories = (data) => {
+    console.log("Display all categories...");
+    let categories_list = document.getElementById("categories_list");
+    if (categories_list) {
+        let option_items = document.querySelectorAll('.category_item');
+        for (const option_item of option_items) {
+            option_item.remove();
+        }
+    }
+    ReactDOM.render(<Form><CategoriesList /></Form>, document.getElementById("main_header"))
+}
+
+const CategoriesList = (props) => {
+    return (
+        <Form.Group className="mb-4" controlId="categories_list">
+            <Form.Select onChange={(e) => { }} id="categories_list">
+                <option value="">Kategorie auswählen</option>
+                {/* { props.children ? props.children.map((category) => {
+                    <option value={category.id}>{category.name}</option>
+                }) : '' } */}
+            </Form.Select>
+        </Form.Group>
+    )
 }
 
 const ProductListBody = (props) => {
@@ -347,5 +412,6 @@ const ProductPagination = () => {
 }
 
 export {
+    get_all_categories,
     get_all_products
 }

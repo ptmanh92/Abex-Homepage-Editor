@@ -1,12 +1,12 @@
 import React from 'react';
 import { Container, Col, Row } from 'react-bootstrap';
-import App from './App';
+import RightNav from './RightNav';
 
 const Maingrid = (props) => {
     return (
         <Container fluid>
             <Row>
-                <Col xs={2} className="right_nav_wrapper"><App /></Col>
+                <Col xs={2} className="right_nav_wrapper"><RightNav /></Col>
                 <Col xs={10} className="main_content">
                     <div id="main">
                         <div id="main_header"></div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import ListGroup from 'react-bootstrap/ListGroup';
-import { get_all_products } from '../js/product';
+import { get_all_categories, get_all_products } from '../js/product';
 
-const App = () => {
+const RightNav = () => {
     // Set states
     // const [all_products, set_all_products] = useState([]);
 
@@ -39,7 +39,7 @@ const App = () => {
                 </Accordion.Header>
                 <Accordion.Body>
                     <ListGroup variant="flush">
-                        <ListGroup.Item action onClick={(e) => {get_all_products(e)}}>Alle Produkte</ListGroup.Item>
+                        <ListGroup.Item action onClick={(e) => { get_all_categories(); get_all_products(e)}}>Alle Produkte</ListGroup.Item>
                         <ListGroup.Item action onClick={test}>Kategorien</ListGroup.Item>
                         <ListGroup.Item action onClick={test}>Eigenschaften</ListGroup.Item>
                     </ListGroup>
@@ -82,4 +82,4 @@ const App = () => {
     )
 }
 
-export default App;
+export default RightNav;
