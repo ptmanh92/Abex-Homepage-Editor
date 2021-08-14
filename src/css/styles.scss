@@ -1,26 +1,5 @@
-// Color schemas
-// Gray
-// $color_schema_gray_800: #424242;
-// $color_schema_gray_700: #616161;
-// $color_schema_gray_600: #757575;
-// $color_schema_gray_500: #9E9E9E;
-// $color_schema_gray_400: #BDBDBD;
-// $color_schema_gray_300: #E0E0E0;
-// $color_schema_gray_200: #EEEEEE;
-// $color_schema_gray_100: #FAFAFA;
-// Blue-gray
-$color_schema_blue_800: #263238;
-$color_schema_blue_700: #37474F;
-$color_schema_blue_600: #526069;
-$color_schema_blue_500: #76838F;
-$color_schema_blue_400: #A3AFB7;
-$color_schema_blue_300: #CCD5DB;
-$color_schema_blue_200: #E4EAEC;
-$color_schema_blue_100: #F3F7F9;
-
-$color_box_shadow: rgb(0, 0, 0, .2);
-
 // GLOBAL
+@import "./colors";
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 body * {
     font-family: 'Lato', sans-serif;
@@ -119,14 +98,67 @@ body {
     }
     .modal-body {
         background-color: $color_schema_blue_200;
+        padding: 0;
         img {
             width: 100%;
             height: auto;
         }
+        > .row {
+            margin: 0;
+        }
+        .tab_cols {
+            padding: 0;
+        }
+        .tab_contents {
+            padding: 1rem;
+        }
         .product_gallery_wrapper {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 0.5rem;
+            > div {
+                position: relative;
+                border: 1px solid transparent;
+                &.is_featured {
+                    border: 1px solid $bootstrap_success;
+                }
+                > .badge, > .image_option {
+                    border-radius: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                }
+                > .image_option {
+                    display: grid;
+                    align-items: center;
+                    align-content: center;
+                    gap: 1rem;
+                    opacity: .9;
+                    padding: 1rem;
+                    width: 100%;
+                    height: 100%;
+                    background-color: $bootstrap_dark;
+                }
+                #btn_add_product_image {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 0;
+                    > i {
+                        font-size: 3rem;
+                    }
+                }
+            }
+        }
+        .nav-item a {
+            // background-color: $color_schema_blue_300;
+            color: black;
+            &.active {
+                background-color: $color_schema_blue_700;
+                color: white;
+            }
+        }
+        .nav-item:not(:last-child) a {
+            border-bottom: 1px solid $color_schema_blue_300;
         }
     }
     .form-label {

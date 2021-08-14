@@ -1,0 +1,53 @@
+// Color schemas
+// Bootstrap
+$bootstrap_blue: #0d6efd;
+$bootstrap_indigo: #6610f2;
+$bootstrap_purple: #6f42c1;
+$bootstrap_pink: #d63384;
+$bootstrap_red: #dc3545;
+$bootstrap_orange: #fd7e14;
+$bootstrap_yellow: #ffc107;
+$bootstrap_green: #198754;
+$bootstrap_teal: #20c997;
+$bootstrap_cyan: #0dcaf0;
+$bootstrap_white: #fff;
+$bootstrap_gray-100: #f8f9fa;
+$bootstrap_gray-200: #e9ecef;
+$bootstrap_gray-300: #dee2e6;
+$bootstrap_gray-400: #ced4da;
+$bootstrap_gray-500: #adb5bd;
+$bootstrap_gray-600: #6c757d;
+$bootstrap_gray-700: #495057;
+$bootstrap_gray-800: #343a40;
+$bootstrap_gray-900: #212529;
+$bootstrap_black: #000;
+$bootstrap_primary: $bootstrap_blue;
+$bootstrap_secondary: $bootstrap_gray-600;
+$bootstrap_success: $bootstrap_green;
+$bootstrap_info: $bootstrap_cyan;
+$bootstrap_warning: $bootstrap_yellow;
+$bootstrap_danger: $bootstrap_red;
+$bootstrap_light: $bootstrap_gray-100;
+$bootstrap_dark: $bootstrap_gray-900;
+
+// Gray
+$color_schema_gray_800: #424242;
+$color_schema_gray_700: #616161;
+$color_schema_gray_600: #757575;
+$color_schema_gray_500: #9E9E9E;
+$color_schema_gray_400: #BDBDBD;
+$color_schema_gray_300: #E0E0E0;
+$color_schema_gray_200: #EEEEEE;
+$color_schema_gray_100: #FAFAFA;
+
+// Blue-gray
+$color_schema_blue_800: #263238;
+$color_schema_blue_700: #37474F;
+$color_schema_blue_600: #526069;
+$color_schema_blue_500: #76838F;
+$color_schema_blue_400: #A3AFB7;
+$color_schema_blue_300: #CCD5DB;
+$color_schema_blue_200: #E4EAEC;
+$color_schema_blue_100: #F3F7F9;
+
+$color_box_shadow: rgb(0, 0, 0, .2);
