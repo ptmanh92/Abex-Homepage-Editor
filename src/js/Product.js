@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 import FilterCategoriesList from '../components/products/FilterCategoriesList';
 import FilterProductsPerPage from '../components/products/FilterProductsPerPage';
+import FilterProductSorting from '../components/products/FilterProductSorting';
+import FilterProductSearch from '../components/products/FilterProductSearch';
 import ProductListBody from '../components/products/ProductListBody';
 
 //Request options
@@ -132,7 +134,15 @@ const display_product_main_header = (data) => {
             option_item.remove();
         }
     }
-    ReactDOM.render(<Form className="d-flex"><FilterCategoriesList /><FilterProductsPerPage /></Form>, document.getElementById("main_header"))
+    ReactDOM.render(
+        <div className="d-flex">
+            <FilterCategoriesList />
+            <FilterProductsPerPage />
+            <FilterProductSorting />
+            <FilterProductSearch />
+            {/* <Button variant="success" className="shadow-none rounded-0" onClick={() => {  }}>Produkt erstellen</Button> */}
+        </div>,
+    document.getElementById("main_header"))
 }
 
 const get_all_products = async (event, page_number) => {
@@ -147,6 +157,11 @@ const get_all_products = async (event, page_number) => {
     let filter_products_per_page = document.getElementById("filter_products_per_page");
     let per_page = 10;
     if (filter_products_per_page) per_page = filter_products_per_page.value;
+
+    // Get sorting
+    let filter_products_sorting = document.getElementById("filter_products_sorting");
+    let sorting = '';
+    if (filter_products_sorting) sorting = filter_products_sorting.value != -1 ? filter_products_sorting.value : '';
     
     // Get page number
     let page_num = page_number ? page_number : 1;
@@ -154,7 +169,7 @@ const get_all_products = async (event, page_number) => {
     let url = 'https://abex.phanthemanh.com/wp-json/wc/v3/products/';
     let url_cat = category_id >= 0 ? `&category=${category_id}` : '';
     let url_per_page = per_page > 0 ? `&per_page=${per_page}` : '';
-    let final_url = url + "?page=" + page_num + url_cat + url_per_page;
+    let final_url = url + "?page=" + page_num + url_cat + url_per_page + sorting;
     console.log(final_url);
     
     const fetched_products = await fetch(final_url, requestOptions_woo)
