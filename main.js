@@ -55,6 +55,11 @@ function createMainWindow() {
 //     aboutWindow.removeMenu();
 // }
 
+// const Store = require('electron-store');
+// const store = new Store();
+// store.set('foo.bar', true);
+// console.log(store.get('foo'));
+
 // Auto reload electron
 require('electron-reload')(__dirname, {
     electron: path.join(__dirname, 'node_modules', '.bin', 'electron')
