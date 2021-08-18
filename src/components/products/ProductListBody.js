@@ -11,6 +11,8 @@ import Tab from 'react-bootstrap/Tab';
 import Badge from 'react-bootstrap/Badge';
 import { CKEditor } from 'ckeditor4-react';
 import { shell } from 'electron';
+import { generate_unique_key } from '../../js/product';
+import { uuid } from 'uuidv4';
 
 const ProductListBody = (props) => {
     const [product_data, setProductData] = useState({});
@@ -98,14 +100,54 @@ const ProductListBody = (props) => {
         let selected_image = document.getElementById(`product_image_${id}`);
         selected_image.remove();
     }
+    
+    const ChildCategory = (props) => {
+        // const [new_space, SetNewSpace] = useState(space);
+        return(
+            <React.Fragment>
+                {
+                    props.children ? props.children.data.map((item, index) => {
+                        if (item.id == props.children.cat_id)
+                            return(
+                                <option key={uuid()} className="category_item" value={item.id}>{`${props.children.space} ${item.name}`}</option>
+                            )
+                    }) : ''
+                }
+            </React.Fragment>
+        )
+    }
 
     const ProductModal = () => {
+        const get_cat_ids_only = (data) => {
+            if (data) {
+                let new_category_ids = [];
+                for (const cat of data) {
+                    new_category_ids.push(cat.id);
+                }
+                return new_category_ids;
+            }
+            return [];
+        }
+
         const [textfield_name, setTextfieldName] = useState(product_data.name);
         const [textfield_sku, setTextfieldSKU] = useState(product_data.sku);
         const [textfield_active_price, setTextfieldActivePrice] = useState(product_data.price);
         const [select_type, setSelectType] = useState(product_data.type);
+        const [select_categories, setSelectCategories] = useState(get_cat_ids_only(product_data.categories));
         const [checkbox_visble, setCheckboxVisble] = useState(product_data.status == 'publish' ? true : false)
         const [images, setImages] = useState(product_data.images);
+        const all_categories = JSON.parse(window.localStorage.getItem('product_categories')) || [];
+
+        const select_multiple_values = (e) => {
+            var new_cat_ids = [];
+            for (const selected_cat of e.target.selectedOptions) {
+                // console.log(selected_cat.value)
+                new_cat_ids.push(selected_cat.value);
+            }
+            setSelectCategories(new_cat_ids);
+
+            // setSelectCategories([].slice.call(e.target.selectedOptions).map(item => item.value))
+        }
         
         return (
             <Modal show={show_product_modal} fullscreen={true} onHide={() => setShowProductModal(false)} id="product_details_modal">
@@ -138,34 +180,76 @@ const ProductListBody = (props) => {
                             <Col sm={10} className="tab_contents">
                                 <Tab.Content>
                                     <Tab.Pane eventKey="general" className="product_info_basic">
-                                        <Form>
-                                            <Form.Group className="mb-3" controlId="product_type">
-                                                <Form.Label>Typ</Form.Label>
-                                                <Form.Select value={select_type} onChange={(e) => { setSelectType(e.target.selectedOptions[0].value) }}>
-                                                    <option value="simple">Einfaches Produkt</option>
-                                                    <option value="variable">Variables Produkt</option>
-                                                </Form.Select>
-                                            </Form.Group>
+                                        <Row>
+                                            <Col sm={8}>
+                                                <Form.Group className="mb-3" controlId="product_type">
+                                                    <Form.Label>Typ</Form.Label>
+                                                    <Form.Select key="product_type_select" value={select_type} onChange={(e) => { setSelectType(e.target.selectedOptions[0].value) }}>
+                                                        <option value="simple">Einfaches Produkt</option>
+                                                        <option value="variable">Variables Produkt</option>
+                                                    </Form.Select>
+                                                </Form.Group>
 
-                                            <Form.Group className="mb-3" controlId="product_title">
-                                                <Form.Label>Titel</Form.Label>
-                                                <Form.Control type="text" value={textfield_name} onChange={(e) => { setTextfieldName(e.target.value) }} />
-                                            </Form.Group>
+                                                <Form.Group className="mb-3" controlId="product_title">
+                                                    <Form.Label>Titel</Form.Label>
+                                                    <Form.Control key="product_title" type="text" value={textfield_name} onChange={(e) => { setTextfieldName(e.target.value) }} />
+                                                </Form.Group>
 
-                                            <Form.Group className="mb-3" controlId="product_sku">
-                                                <Form.Label>Artikelnummer / SKU</Form.Label>
-                                                <Form.Control type="text" value={textfield_sku} onChange={(e) => { setTextfieldSKU(e.target.value) }} />
-                                            </Form.Group>
+                                                <Form.Group className="mb-3" controlId="product_sku">
+                                                    <Form.Label>Artikelnummer / SKU</Form.Label>
+                                                    <Form.Control key="product_sku" type="text" value={textfield_sku} onChange={(e) => { setTextfieldSKU(e.target.value) }} />
+                                                </Form.Group>
 
-                                            <Form.Group className="mb-3" controlId="product_active_price">
-                                                <Form.Label>Preis</Form.Label>
-                                                <Form.Control type="number" min="0" step="0.01" value={textfield_active_price} onChange={(e) => { setTextfieldActivePrice(e.target.value) }} />
-                                            </Form.Group>
+                                                <Form.Group className="mb-3" controlId="product_active_price">
+                                                    <Form.Label>Preis</Form.Label>
+                                                    <Form.Control type="number" min="0" step="0.01" value={textfield_active_price} onChange={(e) => { setTextfieldActivePrice(e.target.value) }} />
+                                                </Form.Group>
 
-                                            <Form.Group className="mb-3" controlId="product_status">
-                                                <Form.Check type="checkbox" label="Sichtbar?" checked={checkbox_visble} onChange={(e) => { setCheckboxVisble(e.target.checked) }} />
-                                            </Form.Group>
-                                        </Form>
+                                                <Form.Group className="mb-3" controlId="product_status">
+                                                    <Form.Check type="checkbox" label="Sichtbar?" checked={checkbox_visble} onChange={(e) => { setCheckboxVisble(e.target.checked) }} />
+                                                </Form.Group>
+                                            </Col>
+
+                                            <Col sm={4}>
+                                                <Form.Group className="mb-3 h-100" controlId="product_categories">
+                                                    <Form.Label>Kategorien</Form.Label>
+                                                    <Form.Control 
+                                                        multiple 
+                                                        as="select"
+                                                        key="product_categories_select" 
+                                                        controlid="product_categories"
+                                                        // id="product_categories" 
+                                                        className="h-100"
+                                                        value={select_categories} 
+                                                        onChange={(e) => { select_multiple_values(e) }}
+                                                    >
+                                                        {
+                                                            all_categories.map((category, index) => {
+                                                                if (category.parent == 0) {
+                                                                    return (
+                                                                        <React.Fragment key={index}>
+                                                                            <option key={category.id} className="category_item" value={category.id}>{category.name}</option>
+                                                                            {
+                                                                                category.children.length > 0 ? category.children.map((child_id) => {
+                                                                                    let new_props = {
+                                                                                        data: all_categories,
+                                                                                        cat_id: child_id,
+                                                                                        space: '---'
+                                                                                    }
+                                                                                    return (
+                                                                                        <ChildCategory key={uuid()}>{new_props}</ChildCategory>
+                                                                                    )
+                                                                                }) : ''
+                                                                            }
+                                                                        </React.Fragment>
+                                                                    )
+                                                                }
+                                                            })
+                                                        }
+                                                    </Form.Control>
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
                                     </Tab.Pane>
 
                                     <Tab.Pane eventKey="gallery" className="product_info_gallery">

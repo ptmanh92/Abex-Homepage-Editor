@@ -17,6 +17,16 @@ var requestOptions_woo = {
     headers: woo_headers,
     redirect: 'follow'
 };
+var requestOptions_POST_woo = {
+    method: 'POST',
+    headers: woo_headers,
+    redirect: 'follow'
+};
+var requestOptions_DELETE_woo = {
+    method: 'DELETE',
+    headers: woo_headers,
+    redirect: 'follow'
+};
 const no_photo = '../assets/img/default/no_photo.jpg';
 
 const get_all_categories = async () => {
@@ -230,7 +240,12 @@ const prepare_product_main_footer = (pagination_data) => {
     )
 }
 
+const generate_unique_key = (pre) => {
+    return `${pre}_${new Date().getTime()}`;
+}
+
 export {
+    generate_unique_key,
     prepare_product_gui,
     get_all_categories,
     get_all_products
