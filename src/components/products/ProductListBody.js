@@ -109,7 +109,22 @@ const ProductListBody = (props) => {
                     props.children ? props.children.data.map((item, index) => {
                         if (item.id == props.children.cat_id)
                             return(
-                                <option key={uuid()} className="category_item" value={item.id}>{`${props.children.space} ${item.name}`}</option>
+                                <React.Fragment key={uuid()}>
+                                    <option key={uuid()} className="category_item" value={item.id}>{`${props.children.space} ${item.name}`}</option>
+                                    {
+                                        item.children.length > 0 ? item.children.map((grand_child_id) => {
+                                            let new_space = props.children.space + '---';
+                                            let new_props = {
+                                                data: props.children.data,
+                                                cat_id: grand_child_id,
+                                                space: new_space
+                                            }
+                                            return(
+                                                <ChildCategory key={uuid()}>{new_props}</ChildCategory>
+                                            )
+                                        }) : ''
+                                    }
+                                </React.Fragment>
                             )
                     }) : ''
                 }
@@ -145,8 +160,6 @@ const ProductListBody = (props) => {
                 new_cat_ids.push(selected_cat.value);
             }
             setSelectCategories(new_cat_ids);
-
-            // setSelectCategories([].slice.call(e.target.selectedOptions).map(item => item.value))
         }
         
         return (
@@ -184,7 +197,7 @@ const ProductListBody = (props) => {
                                             <Col sm={8}>
                                                 <Form.Group className="mb-3" controlId="product_type">
                                                     <Form.Label>Typ</Form.Label>
-                                                    <Form.Select key="product_type_select" value={select_type} onChange={(e) => { setSelectType(e.target.selectedOptions[0].value) }}>
+                                                    <Form.Select key="product_type_select" className="shadow-none" value={select_type} onChange={(e) => { setSelectType(e.target.selectedOptions[0].value) }}>
                                                         <option value="simple">Einfaches Produkt</option>
                                                         <option value="variable">Variables Produkt</option>
                                                     </Form.Select>
@@ -192,17 +205,17 @@ const ProductListBody = (props) => {
 
                                                 <Form.Group className="mb-3" controlId="product_title">
                                                     <Form.Label>Titel</Form.Label>
-                                                    <Form.Control key="product_title" type="text" value={textfield_name} onChange={(e) => { setTextfieldName(e.target.value) }} />
+                                                    <Form.Control key="product_title" type="text" className="shadow-none" value={textfield_name} onChange={(e) => { setTextfieldName(e.target.value) }} />
                                                 </Form.Group>
 
                                                 <Form.Group className="mb-3" controlId="product_sku">
                                                     <Form.Label>Artikelnummer / SKU</Form.Label>
-                                                    <Form.Control key="product_sku" type="text" value={textfield_sku} onChange={(e) => { setTextfieldSKU(e.target.value) }} />
+                                                    <Form.Control key="product_sku" type="text" className="shadow-none" value={textfield_sku} onChange={(e) => { setTextfieldSKU(e.target.value) }} />
                                                 </Form.Group>
 
                                                 <Form.Group className="mb-3" controlId="product_active_price">
                                                     <Form.Label>Preis</Form.Label>
-                                                    <Form.Control type="number" min="0" step="0.01" value={textfield_active_price} onChange={(e) => { setTextfieldActivePrice(e.target.value) }} />
+                                                    <Form.Control type="number" min="0" step="0.01" className="shadow-none" value={textfield_active_price} onChange={(e) => { setTextfieldActivePrice(e.target.value) }} />
                                                 </Form.Group>
 
                                                 <Form.Group className="mb-3" controlId="product_status">
@@ -219,7 +232,7 @@ const ProductListBody = (props) => {
                                                         key="product_categories_select" 
                                                         controlid="product_categories"
                                                         // id="product_categories" 
-                                                        className="h-100"
+                                                        className="h-100 shadow-none"
                                                         value={select_categories} 
                                                         onChange={(e) => { select_multiple_values(e) }}
                                                     >
@@ -247,6 +260,9 @@ const ProductListBody = (props) => {
                                                             })
                                                         }
                                                     </Form.Control>
+                                                    <Form.Text className="text-muted">
+                                                        Halten Sie die Strg-(Windows) oder Befehlstaste(Mac) gedrückt, um mehrere Kategorien auszuwählen.
+                                                    </Form.Text>
                                                 </Form.Group>
                                             </Col>
                                         </Row>
