@@ -4,7 +4,7 @@ import { get_all_products } from '../../js/product';
 
 const FilterProductsPerPage = (props) => {
     return (
-        <Form.Group controlId="filter_products_per_page">
+        // <Form.Group controlId="filter_products_per_page">
             <Form.Select id="filter_products_per_page" className="shadow-none rounded-0" onChange={(e) => { get_all_products() }}>
                 <option value="10">Artikel pro Seite</option>
                 <option value="10">10</option>
@@ -18,7 +18,7 @@ const FilterProductsPerPage = (props) => {
                 <option value="90">90</option>
                 <option value="100">100</option>
             </Form.Select>
-        </Form.Group>
+        // </Form.Group>
     )
 }
 

@@ -8,13 +8,15 @@ const FilterProductSearch = (props) => {
     }
 
     return (
-        <Form.Group controlId="filter_products_search">
+        // <Form.Group controlId="filter_products_search">
             <Form.Control
                 type="text"
+                id="filter_products_search"
                 className="shadow-none rounded-0"
                 placeholder="Produkte suchen..."
-                onKeyDown={(e) => { handle_keydown(e) }} />
-        </Form.Group>
+                onKeyDown={(e) => { handle_keydown(e) }}
+            />
+        // </Form.Group>
     )
 }
 

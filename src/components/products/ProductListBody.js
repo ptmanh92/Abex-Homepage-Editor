@@ -258,13 +258,13 @@ const ProductListBody = (props) => {
             <Table striped bordered hover className="product_list">
                 <thead>
                     <tr>
-                        <th><Form.Check inline type="checkbox" id="checkbox_all" onChange={(e) => {select_all_checkboxes(e)}} /></th>
                         <th>Hauptbild</th>
                         <th>Titel</th>
                         <th>Artikelnummer</th>
                         <th>Varianten</th>
                         <th>Sichbarkeit</th>
                         <th></th>
+                        <th><Form.Check inline type="checkbox" id="checkbox_all" onChange={(e) => {select_all_checkboxes(e)}} /></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -274,7 +274,6 @@ const ProductListBody = (props) => {
                         let visible = product.status == 'publish' ? 'check' : 'times';
                         return (
                             <tr key={product.id} id={`product_${product.id}`} className="product_row">
-                                <td><Form.Check inline type="checkbox" name="product_item_checkbox" id={`checkbox_${product.id}`} onChange={(e) => {set_checkbox_state(e)}} /></td>
                                 <td><img src={img_url}></img></td>
                                 <td className="row_product_name">{product.name}</td>
                                 <td>{product.sku}</td>
@@ -287,6 +286,7 @@ const ProductListBody = (props) => {
                                         <Button variant="secondary" size="sm" className="shadow-none"><i className="fa fa-trash"></i></Button>
                                     </ButtonGroup>
                                 </td>
+                                <td><Form.Check inline type="checkbox" name="product_item_checkbox" id={`checkbox_${product.id}`} onChange={(e) => {set_checkbox_state(e)}} /></td>
                             </tr>
                         )
                     }) }

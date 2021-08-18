@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import ListGroup from 'react-bootstrap/ListGroup';
-import { get_all_categories, get_all_products } from '../js/product';
+import { prepare_product_gui, get_all_categories, get_all_products } from '../js/product';
 
 const RightNav = () => {
     // Set states
@@ -39,7 +39,7 @@ const RightNav = () => {
                 </Accordion.Header>
                 <Accordion.Body>
                     <ListGroup variant="flush">
-                        <ListGroup.Item action onClick={(e) => { get_all_categories(); get_all_products(e)}}>Alle Produkte</ListGroup.Item>
+                        <ListGroup.Item action onClick={(e) => { prepare_product_gui(); get_all_categories(); get_all_products(); }}>Alle Produkte</ListGroup.Item>
                         <ListGroup.Item action onClick={test}>Kategorien</ListGroup.Item>
                         <ListGroup.Item action onClick={test}>Eigenschaften</ListGroup.Item>
                     </ListGroup>

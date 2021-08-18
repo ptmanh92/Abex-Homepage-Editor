@@ -6,6 +6,7 @@ import FilterProductsPerPage from '../components/products/FilterProductsPerPage'
 import FilterProductSorting from '../components/products/FilterProductSorting';
 import FilterProductSearch from '../components/products/FilterProductSearch';
 import ProductListBody from '../components/products/ProductListBody';
+import ProductPagination from '../components/products/ProductPagination';
 
 //Request options
 var woo_headers = new Headers();
@@ -21,9 +22,6 @@ const no_photo = '../assets/img/default/no_photo.jpg';
 const get_all_categories = async () => {
     // Reset localStorage
     localStorage.removeItem('product_categories');
-
-    // Create GUI first
-    display_product_main_header();
 
     let url = "https://abex.phanthemanh.com/wp-json/wc/v3/products/categories?per_page=100";
     const fetched_categories = 
@@ -60,7 +58,7 @@ const get_categories_per_page = async (url, pages_array) => {
             // Reorganize categories and then create GUI
             if (page_number == pages_array.length) {
                 reorganize_categories();
-                console.log(JSON.parse(window.localStorage.getItem('product_categories')));
+                // console.log(JSON.parse(window.localStorage.getItem('product_categories')));
 
                 let final_cat = JSON.parse(window.localStorage.getItem('product_categories'));
                 if (final_cat) {
@@ -125,26 +123,6 @@ const display_child_category = (data_raw, cat_id, space) => {
     }
 }
 
-const display_product_main_header = (data) => {
-    console.log("Display all categories...");
-    let categories_list = document.getElementById("categories_list");
-    if (categories_list) {
-        let option_items = document.querySelectorAll('.category_item');
-        for (const option_item of option_items) {
-            option_item.remove();
-        }
-    }
-    ReactDOM.render(
-        <div className="d-flex">
-            <FilterCategoriesList />
-            <FilterProductsPerPage />
-            <FilterProductSorting />
-            <FilterProductSearch />
-            {/* <Button variant="success" className="shadow-none rounded-0" onClick={() => {  }}>Produkt erstellen</Button> */}
-        </div>,
-    document.getElementById("main_header"))
-}
-
 const get_all_products = async (event, page_number) => {
     console.log("Get all products...");
 
@@ -162,6 +140,11 @@ const get_all_products = async (event, page_number) => {
     let filter_products_sorting = document.getElementById("filter_products_sorting");
     let sorting = '';
     if (filter_products_sorting) sorting = filter_products_sorting.value != -1 ? filter_products_sorting.value : '';
+
+    // Get search
+    let filter_products_search = document.getElementById("filter_products_search");
+    let search_str = '';
+    if (filter_products_search) search_str = filter_products_search.value;
     
     // Get page number
     let page_num = page_number ? page_number : 1;
@@ -169,12 +152,30 @@ const get_all_products = async (event, page_number) => {
     let url = 'https://abex.phanthemanh.com/wp-json/wc/v3/products/';
     let url_cat = category_id >= 0 ? `&category=${category_id}` : '';
     let url_per_page = per_page > 0 ? `&per_page=${per_page}` : '';
-    let final_url = url + "?page=" + page_num + url_cat + url_per_page + sorting;
+    let url_search = search_str != '' ? `&search=${search_str}` : '';
+    let final_url = url + "?page=" + page_num + url_cat + url_per_page + sorting + url_search;
     console.log(final_url);
     
     const fetched_products = await fetch(final_url, requestOptions_woo)
         .then(response => {
             let total_pages = parseInt(response.headers.get('X-WP-TotalPages'));
+            let items_found = parseInt(response.headers.get('X-WP-Total'));
+            // localStorage.setItem("products_total_pages", total_pages)
+
+            if (total_pages > 0) {
+                let total_pages_array = [];
+                for (let i = 1; i <= total_pages; i++) {
+                    total_pages_array.push(i);
+                }
+                let new_pagination_data = {
+                    total_pages: total_pages_array,
+                    current_page: page_num > total_pages ? total_pages : page_num,
+                    items_found: items_found
+                }
+
+                prepare_product_main_footer(new_pagination_data);
+            }
+
             return response.json()
         })
         .then(result => {
@@ -192,13 +193,45 @@ const update_product = () => {
     console.log("Updating...");
 }
 
-const ProductPagination = () => {
-    return (
-        <h1>ObjB</h1>
+const prepare_product_gui = (data) => {
+    // Reset localStorage
+    localStorage.removeItem('product_categories');
+    localStorage.removeItem('products_total_pages');
+    localStorage.removeItem('products_current_page');
+
+    let categories_list = document.getElementById("categories_list");
+    if (categories_list) {
+        let option_items = document.querySelectorAll('.category_item');
+        for (const option_item of option_items) {
+            option_item.remove();
+        }
+    }
+    ReactDOM.render(
+        <div className="product_filter_wrapper">
+            <FilterCategoriesList />
+            <FilterProductsPerPage />
+            <FilterProductSorting />
+            <FilterProductSearch />
+        </div>,
+        document.getElementById("main_header")
+    );
+
+    prepare_product_main_footer();
+}
+
+const prepare_product_main_footer = (pagination_data) => {
+    ReactDOM.render(
+        <div className="product_footer_wrapper">
+            <Button variant="success" className="shadow-none" onClick={() => {  }}><i className="fa fa-plus-circle" aria-hidden="true"></i>Produkt erstellen</Button>
+            <ProductPagination>{pagination_data}</ProductPagination>
+            <Button variant="danger" className="shadow-none" onClick={() => {  }}><i className="fa fa-trash" aria-hidden="true"></i>Alles löschen</Button>
+        </div>, 
+        document.getElementById("main_footer")
     )
 }
 
 export {
+    prepare_product_gui,
     get_all_categories,
     get_all_products
 }

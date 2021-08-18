@@ -60,7 +60,7 @@ body {
 // MAIN
 #main {
     display: grid;
-    grid-template-rows: 3.2rem auto 3.2rem;
+    grid-template-rows: 2.375rem auto 3.2rem;
     height: 100vh;
 }
 .main_content {
@@ -69,6 +69,10 @@ body {
 #main_header {
     // display: flex;
     // align-items: center;
+    .product_filter_wrapper {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+    }
 }
 #main_body {
     overflow-y: auto;
@@ -90,6 +94,27 @@ body {
             td.row_product_name {
                 text-align: left;
             }
+        }
+    }
+}
+#main_footer {
+    align-self: center;
+    padding: 0 1rem;
+
+    .product_footer_wrapper {
+        display: grid;
+        grid-template-columns: auto 8fr auto;
+        gap: 1rem;
+        button {
+            display: flex;
+            align-items: center;
+            gap: .3rem;
+        }
+        .product_pagination_wrapper {
+            display: grid;
+            grid-template-columns: auto auto;
+            align-items: center;
+            gap: 1rem;
         }
     }
 }
