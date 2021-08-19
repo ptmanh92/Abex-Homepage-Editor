@@ -9,15 +9,15 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Tab from 'react-bootstrap/Tab';
 import Badge from 'react-bootstrap/Badge';
+import InputGroup from 'react-bootstrap/InputGroup';
 import { CKEditor } from 'ckeditor4-react';
 import { shell } from 'electron';
 import { uuid } from 'uuidv4';
-import { pretty_name } from '../../js/product';
+import { pretty_name, get_all_attributes } from '../../js/product';
 import { FancySwitch } from '../../js/global';
 
 const ProductListBody = (props) => {
     const [product_data, setProductData] = useState({});
-    const [product_attributes, setProductAttributes] = useState([]);
     const [product_variations, setProductVariations] = useState([]);
     const [show_product_modal, setShowProductModal] = useState(false);
 
@@ -45,8 +45,6 @@ const ProductListBody = (props) => {
     const display_product_modal = async (product_data) => {
         if (product_data) {
             setProductData(product_data);
-            setProductAttributes(product_data.attributes);
-            console.log(product_attributes)
 
             localStorage.removeItem('product_variations');
             if (product_data.type == 'variable') {
@@ -220,6 +218,7 @@ const ProductListBody = (props) => {
         const [select_categories, setSelectCategories] = useState(get_cat_ids_only(product_data.categories));
         const [checkbox_visble, setCheckboxVisble] = useState(product_data.status == 'publish' ? true : false)
         const [images, setImages] = useState(product_data.images);
+        const [product_attributes, setProductAttributes] = useState(product_data.attributes || []);
         const all_categories = JSON.parse(window.localStorage.getItem('product_categories')) || [];
 
         const select_multiple_values = (e) => {
@@ -229,6 +228,59 @@ const ProductListBody = (props) => {
                 new_cat_ids.push(selected_cat.value);
             }
             setSelectCategories(new_cat_ids);
+        }
+
+        const SelectExistingAttribute = (props) => {
+            const [existing_attribute, setExistingAttribute] = useState(-1);
+            const [attribute_list, setAttributeList] = useState([])
+
+            const get_existing_attributes = async () => {
+                let url = 'https://abex.phanthemanh.com/wp-json/wc/v3/products/attributes';
+                const fetched_attributes = 
+                    await fetch(url, requestOptions_woo)
+                    .then(response => response.json())
+                    .then(result => {
+                        setAttributeList(result);
+                    })
+                    .catch(error => console.log('error', error));
+            }
+
+            const insert_existing_attribute = (e) => {
+                let selected_attrib = e.target.selectedOptions[0];
+                setExistingAttribute(selected_attrib.value);
+
+                if (selected_attrib.value != -1) {
+                    let new_attribute = {
+                        id: parseInt(selected_attrib.value),
+                        name: selected_attrib.innerText,
+                        visible: true,
+                        variation: true,
+                        options: []
+                    }
+                    // let new_product_attribs = product_attributes;
+                    // new_product_attribs.push(new_attribute);
+                    // console.log(new_product_attribs);
+    
+                    setProductAttributes(old_attribs => [...old_attribs, new_attribute]);
+                }
+            }
+
+            return (
+                <div className="select_existing_attribute_wrapper">
+                    <Button variant="outline-secondary" className="shadow-none" onClick={() => { get_existing_attributes() }}>Eigenschaften laden</Button>
+                    <Form.Select key="select_existing_attribute" className="shadow-none rounded-0" value={existing_attribute} onChange={(e) => { insert_existing_attribute(e) }}>
+                        <option key={-1} value="-1">Attribut auswählen</option>
+                        {
+                            attribute_list.length > 0 ? attribute_list.map((attribute_item) => {
+                                return (
+                                    <option key={attribute_item.id} value={attribute_item.id}>{attribute_item.name}</option>
+                                )
+                            }) : ''
+                        }
+                    </Form.Select>
+                    <Form.Control type="text" className="shadow-none rounded-0" placeholder="Attribute erstellen..." />
+                </div>
+            )
         }
         
         return (
@@ -403,16 +455,17 @@ const ProductListBody = (props) => {
 
                                     <Tab.Pane eventKey="attributes" className="product_info_attributes">
                                         <div className="product_attributes_wrapper">
+                                            <SelectExistingAttribute />
                                             <Table striped bordered hover className="product_attributes_list">
                                                 <thead>
                                                     <tr>
                                                         <th>ID</th>
                                                         <th>Titel</th>
+                                                        <th>Werte</th>
                                                         {/* <th>Sichtbar?</th> */}
                                                         {/* <th>Für Varianten?</th> */}
-                                                        <th>Werte</th>
                                                         <th></th>
-                                                        <th><Form.Check inline type="checkbox" id="checkbox_all" onChange={(e) => {select_all_checkboxes(e, "attribute_item_checkbox")}} /></th>
+                                                        {/* <th><Form.Check inline type="checkbox" id="attribute_checkbox_all" onChange={(e) => {select_all_checkboxes(e, "attribute_item_checkbox")}} /></th> */}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -430,8 +483,32 @@ const ProductListBody = (props) => {
                                                                 <tr key={attribute.id} id={`attribute_${attribute.id}`} className="attribute_row">
                                                                     <td>{attribute.id}</td>
                                                                     <td>{attribute.name}</td>
+                                                                    <td>
+                                                                        {
+                                                                            attribute.options.map((option_name, index) => {
+                                                                                return (
+                                                                                    <InputGroup key={`${attribute.id}_${index}`} className="mb-1">
+                                                                                        <Form.Control 
+                                                                                            id={`attribute_${attribute.id}_${index}`}
+                                                                                            type="text" 
+                                                                                            className="shadow-none" 
+                                                                                            value={option_name}
+                                                                                            onChange={(e) => {}}
+                                                                                        />
+                                                                                        <Button variant="outline-secondary" className="shadow-none"><i className="fa fa-times"></i></Button>
+                                                                                    </InputGroup>
+                                                                                )
+                                                                            })
+                                                                        }
+                                                                    </td>
                                                                     {/* <td><FancySwitch>{is_visible}</FancySwitch></td> */}
                                                                     {/* <td><FancySwitch>{is_for_variation}</FancySwitch></td> */}
+                                                                    <td>
+                                                                        <ButtonGroup>
+                                                                            <Button variant="danger" size="sm" className="shadow-none"><i className="fa fa-trash"></i></Button>
+                                                                        </ButtonGroup>
+                                                                    </td>
+                                                                    {/* <td><Form.Check inline type="checkbox" name="attribute_item_checkbox" id={`attribute_checkbox_${attribute.id}`} onChange={(e) => {set_checkbox_state(e, "attribute_checkbox_all", "attribute_item_checkbox")}} /></td> */}
                                                                 </tr>
                                                             )
                                                         }) : ''
@@ -442,7 +519,85 @@ const ProductListBody = (props) => {
                                     </Tab.Pane>
 
                                     <Tab.Pane eventKey="variations" className="product_info_variations">
-                                        Tab third
+                                        <div className="product_variations_wrapper">
+                                            <Table striped bordered hover className="product_variations_list">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Artikelnummer</th>
+                                                        <th>Preis</th>
+                                                        {
+                                                            product_attributes.length > 0 ? product_attributes.map((attribute) => {
+                                                                return (
+                                                                    <th key={`attrib_${attribute.id}`}>{attribute.name}</th>
+                                                                )
+                                                            }) : ''
+                                                        }
+                                                        <th></th>
+                                                        <th><Form.Check inline type="checkbox" id="variation_checkbox_all" onChange={(e) => {select_all_checkboxes(e, "variation_item_checkbox")}} /></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        product_variations.length > 0 ? product_variations.map((variation) => {
+                                                            return (
+                                                                <tr key={`variation_${variation.id}`}>
+                                                                    <td>
+                                                                        <Form.Control 
+                                                                            id={`variation_${variation.id}_sku`}
+                                                                            type="text" 
+                                                                            className="shadow-none" 
+                                                                            value={variation.sku}
+                                                                            onChange={(e) => {}}
+                                                                        />
+                                                                    </td>
+                                                                    <td>
+                                                                        <Form.Control 
+                                                                            id={`variation_${variation.id}_price`}
+                                                                            type="number" 
+                                                                            step="0.01"
+                                                                            min="0.0"
+                                                                            className="shadow-none" 
+                                                                            value={variation.regular_price}
+                                                                            onChange={(e) => {}}
+                                                                        />
+                                                                    </td>
+                                                                    {
+                                                                        variation.attributes.length > 0 ? variation.attributes.map((var_attrib) => {
+                                                                            return (
+                                                                                <td key={`attrib_value_${var_attrib.id}`}>
+                                                                                    {
+                                                                                        product_attributes.length > 0 ? product_attributes.map((attribute) => {
+                                                                                            if (attribute.id == var_attrib.id)
+                                                                                                return (
+                                                                                                    <Form.Select key={`attrib_${var_attrib.id}`} className="shadow-none" value={var_attrib.option} onChange={(e) => {  }}>
+                                                                                                        {
+                                                                                                            attribute.options.length > 0 ? attribute.options.map((new_option, index) => {
+                                                                                                                return (
+                                                                                                                    <option key={`option_${variation.id}_${index}`} value={new_option}>{new_option}</option>
+                                                                                                                )
+                                                                                                            }) : ''
+                                                                                                        }
+                                                                                                    </Form.Select>
+                                                                                                )
+                                                                                        }) : ''
+                                                                                    }
+                                                                                </td>
+                                                                            )
+                                                                        }) : ''
+                                                                    }
+                                                                    <td>
+                                                                        <ButtonGroup>
+                                                                            <Button variant="danger" size="sm" className="shadow-none"><i className="fa fa-trash"></i></Button>
+                                                                        </ButtonGroup>
+                                                                    </td>
+                                                                    <td><Form.Check inline type="checkbox" name="variation_item_checkbox" id={`variation_checkbox_${variation.id}`} onChange={(e) => {set_checkbox_state(e, "variation_checkbox_all", "variation_item_checkbox")}} /></td>
+                                                                </tr>
+                                                            );
+                                                        }) : ''
+                                                    }
+                                                </tbody>
+                                            </Table>
+                                        </div>
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Col>

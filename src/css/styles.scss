@@ -74,10 +74,13 @@ body {
         grid-template-columns: repeat(4, auto);
     }
 }
-#main_body, .product_attributes_wrapper {
+#main_body, .product_attributes_wrapper, .product_variations_wrapper {
     overflow-y: auto;
 
-    table.product_list, table.category_list, table.product_attributes_list {
+    table.product_list, 
+    table.category_list, 
+    table.product_attributes_list,
+    table.product_variations_list {
         th, td {
             text-align: center;
             vertical-align: middle;
@@ -198,6 +201,11 @@ body {
         }
         .nav-item:not(:last-child) a {
             border-bottom: 1px solid $color_schema_blue_300;
+        }
+        .select_existing_attribute_wrapper {
+            display: grid;
+            grid-template-columns: 2fr 4fr 4fr;
+            gap: 1rem;
         }
     }
     .form-label {

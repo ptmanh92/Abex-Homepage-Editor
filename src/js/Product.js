@@ -164,6 +164,7 @@ const prepare_category_gui = () => {
 
     prepare_category_main_footer()
 }
+
 const prepare_category_main_footer = (pagination_data) => {
     ReactDOM.render(
         <div className="category_footer_wrapper">
@@ -173,6 +174,81 @@ const prepare_category_main_footer = (pagination_data) => {
         document.getElementById("main_footer")
     )
 }
+
+
+
+
+//-------------------- ATTRIBUTES --------------------
+const get_all_attributes = async (no_terms, standalone) => {
+    localStorage.removeItem('product_attributes');
+
+    let url = 'https://abex.phanthemanh.com/wp-json/wc/v3/products/attributes';
+    const fetched_attributes = 
+        await fetch(url, requestOptions_woo)
+        .then(response => response.json())
+        .then(result => {
+            if (result.length > 0) {
+                localStorage.setItem('product_attributes', JSON.stringify(result));
+
+                if (!no_terms) {
+                    for (const attribute of result) {
+                        get_terms_by_attribute_id(attribute.id)
+                    }
+                }
+            }
+        })
+        .catch(error => console.log('error', error));
+    
+    if (no_terms) return fetched_attributes
+}
+
+const get_terms_by_attribute_id = async (attribute_id) => {
+    let url = 'https://abex.phanthemanh.com/wp-json/wc/v3/products/attributes';
+    let new_url = `${url}/${attribute_id}/terms?per_page=100`;
+    const fetched_attributes = 
+        await fetch(new_url, requestOptions_woo)
+        .then(response => {
+            let total_pages = parseInt(response.headers.get('X-WP-TotalPages'));
+            let total_pages_array = [];
+            for (let i = 1; i <= total_pages; i++) {
+                total_pages_array.push(i);
+            }
+            get_terms_per_page(new_url, total_pages_array, attribute_id);
+            return response.json()
+        })
+        .then(result => {})
+        .catch(error => console.log('error', error));
+}
+
+const get_terms_per_page = async (url, total_pages_array, attribute_id) => {
+    for (const page_number of total_pages_array) {
+        console.log(`Fetching attribute terms page ${page_number}...`);
+
+        const terms_per_page = 
+            await fetch(url + "&page=" + page_number, requestOptions_woo)
+            .then(response => response.json())
+            .then(result => {
+                let local_attributes = JSON.parse(localStorage.getItem('product_attributes'));
+                for (const local_attribute of local_attributes) {
+                    if (local_attribute.id == attribute_id) {
+                        if (local_attribute.terms) {
+                            for (const item of result) local_attribute.terms.push(item);
+                        } else {
+                            local_attribute.terms = result;
+                        }
+                        break;
+                    }
+                }
+                localStorage.setItem('product_attributes', JSON.stringify(local_attributes));
+
+                // if (page_number == pages_array.length) {
+
+                // }
+            })
+            .catch(error => console.log('error', error));
+    }
+}
+
 
 
 
@@ -290,5 +366,6 @@ export {
     prepare_category_gui,
     prepare_product_gui,
     get_all_categories,
+    get_all_attributes,
     get_all_products
 }
