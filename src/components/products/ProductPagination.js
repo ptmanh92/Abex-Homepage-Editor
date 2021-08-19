@@ -35,7 +35,7 @@ const ProductPagination = (props) => {
 
     return (
         <div className="product_pagination_wrapper">
-            <div id="product_pagination_info" className="text-dark text-end">{`${items_found} Produkt(e) gefunden.`}</div>
+            <div id="product_pagination_info" className="text-dark text-end">{`${items_found} Artikel gefunden.`}</div>
             <InputGroup className="product_pagination_selector">
                 <Button variant="outline-secondary" className="shadow-none" onClick={(e) => { go_to_page(e, -1) }}>Vorherige</Button>
                 <Form.Select

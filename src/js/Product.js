@@ -7,6 +7,7 @@ import FilterProductSorting from '../components/products/FilterProductSorting';
 import FilterProductSearch from '../components/products/FilterProductSearch';
 import ProductListBody from '../components/products/ProductListBody';
 import ProductPagination from '../components/products/ProductPagination';
+import CategoryListBody from '../components/products/CategoryListBody';
 
 //Request options
 var woo_headers = new Headers();
@@ -29,7 +30,15 @@ var requestOptions_DELETE_woo = {
 };
 const no_photo = '../assets/img/default/no_photo.jpg';
 
-const get_all_categories = async () => {
+//---------------------- GLOBAL ----------------------
+const pretty_name = (str) => {
+    let new_str = str.replaceAll(/&amp;/ig, "&");
+    return new_str;
+}
+
+
+//-------------------- CATEGORIES --------------------
+const get_all_categories = async (standalone) => {
     // Reset localStorage
     localStorage.removeItem('product_categories');
 
@@ -42,7 +51,7 @@ const get_all_categories = async () => {
             for (let i = 1; i <= total_pages; i++) {
                 total_pages_array.push(i);
             }
-            get_categories_per_page(url, total_pages_array);
+            get_categories_per_page(url, total_pages_array, standalone);
         })
         .then(result => {})
         .catch(error => {
@@ -50,7 +59,7 @@ const get_all_categories = async () => {
         });
 }
 
-const get_categories_per_page = async (url, pages_array) => {
+const get_categories_per_page = async (url, pages_array, standalone) => {
     for (const page_number of pages_array) {
         console.log(`Fetching product categories page ${page_number}...`);
 
@@ -71,15 +80,20 @@ const get_categories_per_page = async (url, pages_array) => {
                 // console.log(JSON.parse(window.localStorage.getItem('product_categories')));
 
                 let final_cat = JSON.parse(window.localStorage.getItem('product_categories'));
+
                 if (final_cat) {
                     for (const cat of final_cat) {
                         if (cat.parent == 0) {
-                            add_option_to_select("categories_list", cat.id, cat.name, 'category_item');
-                            if (cat.children.length > 0) {
-                                let space = '---';
-                                for (const child_id of cat.children) {
-                                    display_child_category(final_cat, child_id, space);
+                            if (!standalone) {
+                                add_option_to_select("categories_list", cat.id, cat.name, 'category_item');
+                                if (cat.children.length > 0) {
+                                    let space = '---';
+                                    for (const child_id of cat.children) {
+                                        display_child_category(final_cat, child_id, space);
+                                    }
                                 }
+                            } else {
+                                display_categories_standalone(final_cat);
                             }
                         }
                     }
@@ -111,10 +125,14 @@ const add_option_to_select = (id, value, title, class_name) => {
     let select_list = document.getElementById(id);
     let option_item = document.createElement("option");
     option_item.value = value;
-    let new_title = title.replaceAll(/&amp;/ig, "&");
-    option_item.innerText = new_title;
+    // let new_title = title.replaceAll(/&amp;/ig, "&");
+    option_item.innerText = pretty_name(title);
     option_item.setAttribute("class", class_name);
     select_list.appendChild(option_item);
+}
+
+const display_categories_standalone = (data) => {
+    ReactDOM.render(<CategoryListBody>{data}</CategoryListBody>, document.getElementById("main_body"));
 }
 
 const display_child_category = (data_raw, cat_id, space) => {
@@ -133,6 +151,32 @@ const display_child_category = (data_raw, cat_id, space) => {
     }
 }
 
+const prepare_category_gui = () => {
+    ReactDOM.render(
+        <></>,
+        document.getElementById("main_header")
+    )
+
+    ReactDOM.render(
+        <></>,
+        document.getElementById("main_body")
+    )
+
+    prepare_category_main_footer()
+}
+const prepare_category_main_footer = (pagination_data) => {
+    ReactDOM.render(
+        <div className="category_footer_wrapper">
+            <Button variant="success" className="shadow-none" onClick={() => {  }}><i className="fa fa-plus-circle" aria-hidden="true"></i>Kategorie erstellen</Button>
+            <Button variant="danger" className="shadow-none" onClick={() => {  }}><i className="fa fa-trash" aria-hidden="true"></i>Kategorie(n) löschen</Button>
+        </div>, 
+        document.getElementById("main_footer")
+    )
+}
+
+
+
+//--------------------- PRODUCTS ---------------------
 const get_all_products = async (event, page_number) => {
     console.log("Get all products...");
 
@@ -203,7 +247,7 @@ const update_product = () => {
     console.log("Updating...");
 }
 
-const prepare_product_gui = (data) => {
+const prepare_product_gui = () => {
     // Reset localStorage
     localStorage.removeItem('product_categories');
     localStorage.removeItem('products_total_pages');
@@ -240,12 +284,10 @@ const prepare_product_main_footer = (pagination_data) => {
     )
 }
 
-const generate_unique_key = (pre) => {
-    return `${pre}_${new Date().getTime()}`;
-}
 
 export {
-    generate_unique_key,
+    pretty_name,
+    prepare_category_gui,
     prepare_product_gui,
     get_all_categories,
     get_all_products

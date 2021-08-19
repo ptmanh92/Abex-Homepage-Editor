@@ -11,30 +11,99 @@ import Tab from 'react-bootstrap/Tab';
 import Badge from 'react-bootstrap/Badge';
 import { CKEditor } from 'ckeditor4-react';
 import { shell } from 'electron';
-import { generate_unique_key } from '../../js/product';
 import { uuid } from 'uuidv4';
+import { pretty_name } from '../../js/product';
+import { FancySwitch } from '../../js/global';
 
 const ProductListBody = (props) => {
     const [product_data, setProductData] = useState({});
+    const [product_attributes, setProductAttributes] = useState([]);
+    const [product_variations, setProductVariations] = useState([]);
     const [show_product_modal, setShowProductModal] = useState(false);
 
-    const display_product_modal = (new_data) => {
-        setProductData(new_data);
-        setShowProductModal(true);
+    //Request options
+    var woo_headers = new Headers();
+    woo_headers.append("Authorization", "Basic Y2tfMTA0MzMwZTU3OGY2MDgxZGFkOWU4NGU0OGFmYTZiZDhjODk5MjgyOTpjc182MTExYjM4ZGNjOTMxNzJlZWQxNWY3ZGZlODAwODU1NDVjYTczNzRi");
+    woo_headers.append("Content-Type", "application/json");
+    var requestOptions_woo = {
+        method: 'GET',
+        headers: woo_headers,
+        redirect: 'follow'
+    };
+    var requestOptions_POST_woo = {
+        method: 'POST',
+        headers: woo_headers,
+        redirect: 'follow'
+    };
+    var requestOptions_DELETE_woo = {
+        method: 'DELETE',
+        headers: woo_headers,
+        redirect: 'follow'
+    };
+    const base_url = "https://abex.phanthemanh.com/wp-json/wc/v3/products/";
+
+    const display_product_modal = async (product_data) => {
+        if (product_data) {
+            setProductData(product_data);
+            setProductAttributes(product_data.attributes);
+            console.log(product_attributes)
+
+            localStorage.removeItem('product_variations');
+            if (product_data.type == 'variable') {
+                let new_url = base_url + product_data.id + "/variations?per_page=100";
+                const fetched_variations =
+                    await fetch(new_url, requestOptions_woo)
+                    .then(response => {
+                        let total_pages = parseInt(response.headers.get('X-WP-TotalPages'));
+                        let total_pages_array = [];
+                        for (let i = 1; i <= total_pages; i++) {
+                            total_pages_array.push(i);
+                        }
+                        get_variations_per_page(new_url, total_pages_array);
+                    })
+                    .catch(error => console.log('error', error));
+            }
+        }
     }
 
-    const select_all_checkboxes = (e) => {
+    const get_variations_per_page = async (new_url, total_pages_array) => {
+        for (const page_number of total_pages_array) {
+            console.log(`Fetching product variations page ${page_number}...`);
+    
+            const var_per_page = await fetch(new_url + "&page=" + page_number, requestOptions_woo)
+            .then(response => response.json())
+            .then(result => {
+                let local_variations = JSON.parse(window.localStorage.getItem('product_variations'));
+                if (local_variations) {
+                    for (const item of result) local_variations.push(item);
+                    localStorage.setItem('product_variations', JSON.stringify(local_variations));
+                } else {
+                    localStorage.setItem('product_variations', JSON.stringify(result));
+                }
+    
+                // Reorganize categories and then create GUI
+                if (page_number == total_pages_array.length) {
+                    let final_variations = JSON.parse(window.localStorage.getItem('product_variations'));
+                    setProductVariations(final_variations);
+                    setShowProductModal(true);
+                }
+            })
+            .catch(error => console.log('error', error));
+        }
+    }
+
+    const select_all_checkboxes = (e, checkbox_items_name) => {
         let checked_state = e.target.checked;
-        let checkboxes = document.getElementsByName("product_item_checkbox");
+        let checkboxes = document.getElementsByName(checkbox_items_name);
         for (const checkbox of checkboxes) {
             checkbox.checked = checked_state;
         }
     }
 
-    const set_checkbox_state = (e) => {
+    const set_checkbox_state = (e, checkbox_all_id, checkbox_item_name) => {
         let checked_state = e.target.checked;
-        let checkbox_all = document.getElementById("checkbox_all");
-        let checkboxes = document.getElementsByName("product_item_checkbox");
+        let checkbox_all = document.getElementById(checkbox_all_id);
+        let checkboxes = document.getElementsByName(checkbox_item_name);
         if (!checked_state) {
             checkbox_all.checked = false;
         } else {
@@ -110,7 +179,7 @@ const ProductListBody = (props) => {
                         if (item.id == props.children.cat_id)
                             return(
                                 <React.Fragment key={uuid()}>
-                                    <option key={uuid()} className="category_item" value={item.id}>{`${props.children.space} ${item.name}`}</option>
+                                    <option key={uuid()} className="category_item" value={item.id}>{`${props.children.space} ${pretty_name(item.name)}`}</option>
                                     {
                                         item.children.length > 0 ? item.children.map((grand_child_id) => {
                                             let new_space = props.children.space + '---';
@@ -241,7 +310,7 @@ const ProductListBody = (props) => {
                                                                 if (category.parent == 0) {
                                                                     return (
                                                                         <React.Fragment key={index}>
-                                                                            <option key={category.id} className="category_item" value={category.id}>{category.name}</option>
+                                                                            <option key={category.id} className="category_item" value={category.id}>{pretty_name(category.name)}</option>
                                                                             {
                                                                                 category.children.length > 0 ? category.children.map((child_id) => {
                                                                                     let new_props = {
@@ -333,7 +402,43 @@ const ProductListBody = (props) => {
                                     </Tab.Pane>
 
                                     <Tab.Pane eventKey="attributes" className="product_info_attributes">
-                                        Tab third
+                                        <div className="product_attributes_wrapper">
+                                            <Table striped bordered hover className="product_attributes_list">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Titel</th>
+                                                        {/* <th>Sichtbar?</th> */}
+                                                        {/* <th>Für Varianten?</th> */}
+                                                        <th>Werte</th>
+                                                        <th></th>
+                                                        <th><Form.Check inline type="checkbox" id="checkbox_all" onChange={(e) => {select_all_checkboxes(e, "attribute_item_checkbox")}} /></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        product_attributes.length > 0 ? product_attributes.map((attribute) => {
+                                                            let is_visible = {
+                                                                id: attribute.id,
+                                                                state: attribute.visible
+                                                            };
+                                                            let is_for_variation = {
+                                                                id: attribute.id,
+                                                                state: attribute.variation
+                                                            };
+                                                            return(
+                                                                <tr key={attribute.id} id={`attribute_${attribute.id}`} className="attribute_row">
+                                                                    <td>{attribute.id}</td>
+                                                                    <td>{attribute.name}</td>
+                                                                    {/* <td><FancySwitch>{is_visible}</FancySwitch></td> */}
+                                                                    {/* <td><FancySwitch>{is_for_variation}</FancySwitch></td> */}
+                                                                </tr>
+                                                            )
+                                                        }) : ''
+                                                    }
+                                                </tbody>
+                                            </Table>
+                                        </div>
                                     </Tab.Pane>
 
                                     <Tab.Pane eventKey="variations" className="product_info_variations">
@@ -364,7 +469,7 @@ const ProductListBody = (props) => {
                         <th>Varianten</th>
                         <th>Sichbarkeit</th>
                         <th></th>
-                        <th><Form.Check inline type="checkbox" id="checkbox_all" onChange={(e) => {select_all_checkboxes(e)}} /></th>
+                        <th><Form.Check inline type="checkbox" id="checkbox_all" onChange={(e) => {select_all_checkboxes(e, "product_item_checkbox")}} /></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -386,7 +491,7 @@ const ProductListBody = (props) => {
                                         <Button variant="secondary" size="sm" className="shadow-none"><i className="fa fa-trash"></i></Button>
                                     </ButtonGroup>
                                 </td>
-                                <td><Form.Check inline type="checkbox" name="product_item_checkbox" id={`checkbox_${product.id}`} onChange={(e) => {set_checkbox_state(e)}} /></td>
+                                <td><Form.Check inline type="checkbox" name="product_item_checkbox" id={`checkbox_${product.id}`} onChange={(e) => {set_checkbox_state(e, "checkbox_all", "product_item_checkbox")}} /></td>
                             </tr>
                         )
                     }) }
